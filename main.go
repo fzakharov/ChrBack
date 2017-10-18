@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/lib/pq"
 
@@ -105,8 +106,13 @@ func main() {
 		json.NewEncoder(w).Encode(response)
 	})))
 
-	fmt.Println("Start listening on http://lvh.me:3001")
-	http.ListenAndServe(":3001", r)
+	port := os.Getenv("PORT")
+	// if port == "" {
+	// 	log.Fatal("$PORT must be set")
+	// }
+
+	fmt.Println("Start listening on " + port)
+	http.ListenAndServe(":"+port, r)
 }
 
 func checkJwt(h http.Handler) http.Handler {
