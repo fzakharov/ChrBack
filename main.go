@@ -57,6 +57,7 @@ func getFacts() []Fact {
 		var description string
 
 		err = rows.Scan(&description, &factTypeID, &factID)
+		fatalOnErr(err)
 		facts = append(facts, Fact{ID: factID, Title: description})
 	}
 
@@ -107,9 +108,9 @@ func main() {
 	})))
 
 	port := os.Getenv("PORT")
-	// if port == "" {
-	// 	log.Fatal("$PORT must be set")
-	// }
+	if port == "" {
+		port = "3001"
+	}
 
 	fmt.Println("Start listening on " + port)
 	http.ListenAndServe(":"+port, r)
