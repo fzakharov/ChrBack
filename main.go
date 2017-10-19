@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 
@@ -40,25 +41,33 @@ func fatalOnErr(err error) {
 }
 
 func getFacts() []Fact {
-	db, err := sql.Open("postgres",
-		"postgres://developer:dev@localhost:5432/chrono_dev_db?sslmode=disable")
+	dbURI := os.Getenv("DATABASE_URL")
+	if dbURI == "" {
+		dbURI = "postgres://developer:dev@localhost:5432/chrono_dev_db?sslmode=disable"
+	}
+
+	db, err := sql.Open("postgres", dbURI)
 	fatalOnErr(err)
 
-	rows, err := db.Query("SELECT * FROM facts")
+	rows, err := db.Query("CREATE TABLE IF NOT EXISTS facts (title varchar(255), id SERIAL)")
+	fatalOnErr(err)
 
+	_, err = db.Exec("INSERT INTO facts (title) VALUES ($1)", time.Now().String()+" - test record title")
+	fatalOnErr(err)
+
+	rows, err = db.Query("SELECT * FROM facts")
 	fatalOnErr(err)
 	defer rows.Close()
 
 	var facts []Fact
 
 	for rows.Next() {
-		var factID int
-		var factTypeID int
-		var description string
+		var id int
+		var title string
 
-		err = rows.Scan(&description, &factTypeID, &factID)
+		err = rows.Scan(&title, &id)
 		fatalOnErr(err)
-		facts = append(facts, Fact{ID: factID, Title: description})
+		facts = append(facts, Fact{ID: id, Title: title})
 	}
 
 	err = rows.Err()
