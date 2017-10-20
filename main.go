@@ -24,8 +24,11 @@ var auth0ApiAudience = []string{"https://chronolog.eu.auth0.com/api/v2/"}
 
 // Fact DTO
 type Fact struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
+	ID        int       `json:"id"`
+	Title     string    `json:"title"`
+	Note      string    `json:"note"`
+	Timestamp time.Time `json:"timestamp"`
+	Time      time.Time `json:"time"`
 }
 
 // Response to frontend
